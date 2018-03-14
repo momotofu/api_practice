@@ -9,6 +9,7 @@ sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
 app = Flask(__name__)
 
+
 #GET REQUEST
 @app.route('/getGeocodeLocation/<input_string>')
 def getGeocodeLocation(input_string):
@@ -29,6 +30,7 @@ def getGeocodeLocation(input_string):
     latitude = location['lat']
 
     return 'Longitude: %s, Latitude: %s' % (longitude, latitude)
+
 
 @app.route('/readHello')
 def getRequestHello():
