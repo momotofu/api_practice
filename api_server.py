@@ -19,8 +19,11 @@ def getGeocodeLocation(input_string):
 
     response = requests.get(url=url, params=params)
     data = json.loads(response.text)
+    location = data['results'][0]['geometry']['location']
+    longitude = location['lng']
+    latitude = location['lat']
 
-    return jsonify(data)
+    return 'Longitude: %s, Latitude: %s' % (longitude, latitude)
 
 @app.route('/readHello')
 def getRequestHello():
