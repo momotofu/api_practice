@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import json, requests
 
 app = Flask(__name__)
@@ -21,14 +21,13 @@ def getFourSquare():
         client_id=client_ID,
         client_secret=client_secret,
         v='20170801',
-        ll='40.7243,-74.0018',
-        query='lunch',
+        ll=request.args.get('ll'),
+        query=request.args.get('query'),
         limit=1
     )
 
     resp = requests.get(url=url, params=params)
     data = json.loads(resp.text)
-    print('DATA: ', data)
     return jsonify(data)
 
 
