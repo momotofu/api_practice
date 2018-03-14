@@ -1,9 +1,27 @@
 from flask import Flask, jsonify, request
 import json, requests
+import urllib.parse as url_parse
 
 app = Flask(__name__)
 
 #GET REQUEST
+@app.route('/getGeocodeLocation/<input_string>')
+def getGeocodeLocation(input_string):
+    google_api_key = json.loads(open('./credentials.json').read())['Google'
+    ' Maps API']['API Key']
+    location_string = url_parse.quote(input_string)
+
+    params = dict(
+        address=location_string,
+        key=google_api_key
+    )
+    url = ('https://maps.googleapis.com/maps/api/geocode/json')
+
+    response = requests.get(url=url, params=params)
+    data = json.loads(response.text)
+
+    return jsonify(data)
+
 @app.route('/readHello')
 def getRequestHello():
 	return "Hi, I got your GET Request!"
