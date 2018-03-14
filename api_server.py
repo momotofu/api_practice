@@ -29,7 +29,12 @@ def getGeocodeLocation(input_string):
     longitude = location['lng']
     latitude = location['lat']
 
-    return 'Longitude: %s, Latitude: %s' % (longitude, latitude)
+    ll = dict(
+        longitude=longitude,
+        latitude=latitude
+    )
+
+    return jsonify(ll)
 
 
 @app.route('/readHello')
@@ -78,5 +83,6 @@ def deleteRequestHello():
 
 
 if __name__ == '__main__':
+    print('test')
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)	
+    app.run(host='0.0.0.0', port=5000)
