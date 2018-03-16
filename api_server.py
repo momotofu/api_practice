@@ -38,27 +38,44 @@ def getGeocodeLocation(input_string):
 
 
 @app.route('/findRestaurant')
-def findRestaurant(address="Osaka", query="ramen"):
+def findRestaurant(address="Osaka", query="ramen", limit=1):
     if 'address' in request.args:
         address = request.args.get('address')
     if 'query' in request.args:
         query = request.args.get('query')
+    if 'limit' in request.args:
+        limit = request.args.get('limit')
 
+    limit = int(limit)
     ll_data = json.loads(getGeocodeLocation(address).data.decode())
-    ll = ll_data['latitude'], ll_data['longitude']
-    print('ll: ', ll.data.decode())
-    response = json.loads(getFourSquare(query, ll).data.decode())
-    print('response: ', response)
+    ll = '%s, %s' % (ll_data['latitude'], ll_data['longitude'])
+    response = json.loads(getFourSquare(query, ll, limit).data.decode())
+
+    results = {}
+    base = response['response']['groups'][0]['items']
+    for i in range(limit):
+        nbase = base[i]['venue']
+        results[nbase['name']] = dict(
+            address = nbase['location']['address'],
+            picture = 'none' if nbase['photos']['count'] == 0 else
+                nbase['photos']['groups'][0],
+            url = 'none' if not 'url' in nbase.keys() else nbase['url'],
+            rating = 'none' if not 'rating' in nbase.keys() else
+            nbase['rating']
+        )
+    return jsonify(results)
 
 
 @app.route('/fourSquare')
-def getFourSquare(query='pizza', ll='Osaka'):
+def getFourSquare(query='pizza', ll='Osaka', limit=1):
     url = 'https://api.foursquare.com/v2/venues/explore'
 
     if 'query' in request.args:
         query = request.args.get('query')
     if 'll' in request.args:
         ll = request.args.get('ll')
+    if 'limit' in request.args:
+        limit = request.args.get('limit')
 
     credentials = json.loads(open('./credentials.json', 'r').read())['Four Square API']
     client_ID = credentials['Client ID']
@@ -70,7 +87,7 @@ def getFourSquare(query='pizza', ll='Osaka'):
         v='20170801',
         ll=ll,
         query=query,
-        limit=5
+        limit=limit
     )
 
     resp = requests.get(url=url, params=params)
