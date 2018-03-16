@@ -2,9 +2,6 @@ from flask import Flask, jsonify, request
 import json, requests
 import urllib.parse as url_parse
 
-import sys
-import codecs
-
 app = Flask(__name__)
 
 
