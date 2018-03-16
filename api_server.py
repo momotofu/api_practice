@@ -4,8 +4,8 @@ import urllib.parse as url_parse
 
 import sys
 import codecs
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+# sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+# sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
 app = Flask(__name__)
 
@@ -37,14 +37,28 @@ def getGeocodeLocation(input_string):
     return jsonify(ll)
 
 
-@app.route('/readHello')
-def getRequestHello():
-	return "Hi, I got your GET Request!"
+@app.route('/findRestaurant')
+def findRestaurant(address="Osaka", query="ramen"):
+    if 'address' in request.args:
+        address = request.args.get('address')
+    if 'query' in request.args:
+        query = request.args.get('query')
+
+    ll_data = json.loads(getGeocodeLocation(address).data.decode())
+    ll = ll_data['latitude'], ll_data['longitude']
+    print('ll: ', ll.data.decode())
+    response = json.loads(getFourSquare(query, ll).data.decode())
+    print('response: ', response)
 
 
 @app.route('/fourSquare')
-def getFourSquare():
+def getFourSquare(query='pizza', ll='Osaka'):
     url = 'https://api.foursquare.com/v2/venues/explore'
+
+    if 'query' in request.args:
+        query = request.args.get('query')
+    if 'll' in request.args:
+        ll = request.args.get('ll')
 
     credentials = json.loads(open('./credentials.json', 'r').read())['Four Square API']
     client_ID = credentials['Client ID']
@@ -54,9 +68,9 @@ def getFourSquare():
         client_id=client_ID,
         client_secret=client_secret,
         v='20170801',
-        ll=request.args.get('ll'),
-        query=request.args.get('query'),
-        limit=1
+        ll=ll,
+        query=query,
+        limit=5
     )
 
     resp = requests.get(url=url, params=params)
@@ -64,25 +78,7 @@ def getFourSquare():
     return jsonify(data)
 
 
-#POST REQUEST
-@app.route('/createHello', methods = ['POST'])
-def postRequestHello():
-	return "I see you sent a POST message :-)"
-
-
-#UPDATE REQUEST
-@app.route('/updateHello', methods = ['PUT'])
-def updateRequestHello():
-	return "Sending Hello on an PUT request!"
-
-
-#DELETE REQUEST
-@app.route('/deleteHello', methods = ['DELETE'])
-def deleteRequestHello():
-	return "Deleting your hard drive.....haha just kidding! I received a DELETE request!"
-
-
 if __name__ == '__main__':
     print('test')
     app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=4000)
