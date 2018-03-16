@@ -4,8 +4,6 @@ import urllib.parse as url_parse
 
 import sys
 import codecs
-# sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-# sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
 app = Flask(__name__)
 
@@ -49,8 +47,8 @@ def findRestaurant(address="Osaka", query="ramen", limit=1):
     limit = int(limit)
     ll_data = json.loads(getGeocodeLocation(address).data.decode())
     ll = '%s, %s' % (ll_data['latitude'], ll_data['longitude'])
-    response = json.loads(getFourSquare(query, ll, limit).data.decode())
-
+    response = json.loads(getFourSquare(query, ll,
+        limit).data.decode().encode('utf-8'))
     results = {}
     base = response['response']['groups'][0]['items']
     for i in range(limit):
@@ -63,7 +61,8 @@ def findRestaurant(address="Osaka", query="ramen", limit=1):
             rating = 'none' if not 'rating' in nbase.keys() else
             nbase['rating']
         )
-    return jsonify(results)
+
+    return json.dumps(results, ensure_ascii=False, indent=4, sort_keys=True)
 
 
 @app.route('/fourSquare')
