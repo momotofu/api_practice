@@ -34,6 +34,10 @@ def getGeocodeLocation(input_string):
 
 @app.route('/findRestaurant')
 def findRestaurant(address="Osaka", query="ramen", limit=1):
+    """
+    Returns JSON response consisting of restaurant rating, name,
+    address, picture, and url.
+    """
     if 'address' in request.args:
         address = request.args.get('address')
     if 'query' in request.args:
@@ -42,10 +46,14 @@ def findRestaurant(address="Osaka", query="ramen", limit=1):
         limit = request.args.get('limit')
 
     limit = int(limit)
-    ll_data = json.loads(getGeocodeLocation(address).data.decode())
-    ll = '%s, %s' % (ll_data['latitude'], ll_data['longitude'])
-    response = json.loads(getFourSquare(query, ll,
-        limit).data.decode().encode('utf-8'))
+    try:
+        ll_data = json.loads(getGeocodeLocation(address).data.decode())
+        ll = '%s, %s' % (ll_data['latitude'], ll_data['longitude'])
+        response = json.loads(getFourSquare(query, ll,
+            limit).data.decode().encode('utf-8'))
+        print(response)
+    except:
+        raise
     results = {}
     base = response['response']['groups'][0]['items']
     for i in range(limit):
